@@ -16,9 +16,13 @@ const update = (id, newObject) => {
   return request.then((response) => response.data)
 }
 
+const deleteNote = (id) => {
+  return axios.delete(`${baseUrl}/${id}`)
+}
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
   getAll,
   create,
   update,
+  deleteNote,
 }
