@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Note from './components/Note'
 import Notification from './components/Notification'
+import ErrorNotification from './components/ErrorNotification'
 import Footer from './components/Footer'
 import noteService from './services/notes'
 
@@ -8,6 +9,7 @@ const App = () => {
   const [notes, setNotes] = useState([])
   const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(true)
+  const [notification, setNotification] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
@@ -23,10 +25,22 @@ const App = () => {
       important: Math.random() > 0.5,
     }
 
-    noteService.create(noteObject).then((returnedNote) => {
-      setNotes(notes.concat(returnedNote))
-      setNewNote('')
-    })
+    noteService
+      .create(noteObject)
+      .then((returnedNote) => {
+        setNotes(notes.concat(returnedNote))
+        setNewNote('')
+        setNotification(`Added ${returnedNote.content}`)
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000)
+      })
+      .catch((error) => {
+        setErrorMessage(`${error.response.data.error}`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
   }
 
   const handleNoteChange = (event) => {
@@ -42,12 +56,20 @@ const App = () => {
     noteService
       .update(id, changedNote)
       .then((returnedNote) => {
-        setNotes(notes.map((note) => (note.id !== id ? note : returnedNote)))
+        if (returnedNote === null) {
+          setErrorMessage(
+            `Note '${note.content}' was already removed from server`
+          )
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 5000)
+          setNotes(notes.filter((n) => n.id !== id))
+        } else {
+          setNotes(notes.map((note) => (note.id !== id ? note : returnedNote)))
+        }
       })
       .catch((error) => {
-        setErrorMessage(
-          `Note '${note.content}' was already removed from server`
-        )
+        setErrorMessage(`${error.response.data.error}`)
         setTimeout(() => {
           setErrorMessage(null)
         }, 5000)
@@ -76,7 +98,8 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
-      <Notification message={errorMessage} />
+      <Notification message={notification} />
+      <ErrorNotification message={errorMessage} />
       <div>
         <button onClick={() => setShowAll(!showAll)}>
           show {showAll ? 'important' : 'all'}
