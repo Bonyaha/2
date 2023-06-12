@@ -15,8 +15,6 @@ const App = () => {
   const [showAll, setShowAll] = useState(true)
   const [notification, setNotification] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
   useEffect(() => {
@@ -101,8 +99,7 @@ const App = () => {
       })
   }
 
-  const handleLogin = async (event) => {
-    event.preventDefault()
+  const handleLogin = async (username, password) => {
     try {
       const user = await loginService.login({ username, password })
 
@@ -110,8 +107,10 @@ const App = () => {
 
       noteService.setToken(user.token)
       setUser(user)
-      setUsername('')
-      setPassword('')
+      setNotification(`Hello ${user.name}👋`)
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000)
     } catch (exception) {
       setErrorMessage('Wrong credentials')
       setTimeout(() => {
@@ -127,13 +126,7 @@ const App = () => {
       <ErrorNotification message={errorMessage} />
       {!user && (
         <Togglable buttonLabel="log in">
-          <LoginForm
-            username={username}
-            password={password}
-            handleUsernameChange={({ target }) => setUsername(target.value)}
-            handlePasswordChange={({ target }) => setPassword(target.value)}
-            handleSubmit={handleLogin}
-          />
+          <LoginForm handleLogin={handleLogin} />
         </Togglable>
       )}
       {user && (
