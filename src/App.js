@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Note from './components/Note'
 import Notification from './components/Notification'
 import ErrorNotification from './components/ErrorNotification'
@@ -22,16 +22,29 @@ const App = () => {
       setNotes(initialNotes)
     })
   }, [])
+
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
       noteService.setToken(user.token)
+      const tokenExpirationTime = new Date(user.expirationTime)
+      if (tokenExpirationTime < new Date()) {
+        setUser(null)
+        window.localStorage.removeItem('loggedBlogappUser')
+        setErrorMessage('Session expired. Please log in again.')
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      }
     }
   }, [])
 
+  const noteFormRef = useRef()
+
   const addNote = (noteObject) => {
+    noteFormRef.current.toggleVisibility()
     noteService
       .create(noteObject)
       .then((returnedNote) => {
@@ -43,10 +56,16 @@ const App = () => {
         }, 5000)
       })
       .catch((error) => {
+        console.log(error.response.data.error)
+
         setErrorMessage(`${error.response.data.error}`)
         setTimeout(() => {
           setErrorMessage(null)
         }, 5000)
+        if (error.response.data.error === 'token expired') {
+          setUser(null)
+          window.localStorage.removeItem('loggedBlogappUser')
+        }
       })
   }
 
@@ -132,7 +151,7 @@ const App = () => {
       {user && (
         <div>
           <p>{user.name} logged in</p>
-          <Togglable buttonLabel="new note">
+          <Togglable buttonLabel="new note" ref={noteFormRef}>
             <NoteForm createNote={addNote} />
           </Togglable>
         </div>
