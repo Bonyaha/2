@@ -1,10 +1,10 @@
 <!-- starting server -->
 
 1. npm start(normal start)
-2. npm run dev (start with nodemon for restarting it when changes are made)
-3. npm test (for testing) <!-- CI=true npm test  - for testing also -->
+2. npm test (for testing) <!-- CI=true npm test  - for testing also -->
+3. npm run cypress:open <!-- for testing through cypress -->
 
-If you clone the project, run the npm install command before starting the application with npm start or npm run dev.
+   **If you clone the project, run the npm install command before starting the application with npm start or npm run dev.**
 
 npm update - for updating the dependencies of the project
 
