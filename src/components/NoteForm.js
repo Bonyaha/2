@@ -1,8 +1,6 @@
-import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { addNewNote } from '../actions/noteActions'
-import Notification from './Notification'
-import ErrorNotification from './ErrorNotification'
+
 
 
 const NoteForm = ({ noteFormRef, setNotification, setErrorMessage }) => {
