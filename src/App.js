@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import Note from './components/Note'
+import { useDispatch, useSelector } from 'react-redux'
+import Notes from './components/Notes'
 import Notification from './components/Notification'
 import ErrorNotification from './components/ErrorNotification'
 import Footer from './components/Footer'
@@ -8,30 +9,38 @@ import loginService from './services/login'
 import LoginForm from './components/LoginForm'
 import NoteForm from './components/NoteForm'
 import Togglable from './components/Togglable'
+import VisibilityFilter from './components/VisibilityFilter'
+
+import {
+  initializeNotes,
+
+} from './actions/noteActions'
+
+import { setUser, logout } from './actions/userActions'
+
 
 const App = () => {
-  const [notes, setNotes] = useState([])
-
-  const [showAll, setShowAll] = useState(true)
   const [notification, setNotification] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [user, setUser] = useState(null)
+
+
+  const user = useSelector(state => state.user)
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    noteService.getAll().then((initialNotes) => {
-      setNotes(initialNotes)
-    })
+    dispatch(initializeNotes())
   }, [])
+
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      setUser(user)
+      dispatch(setUser(user))
       noteService.setToken(user.token)
       const tokenExpirationTime = new Date(user.expirationTime)
       if (tokenExpirationTime < new Date()) {
-        setUser(null)
+        dispatch(logout())
         window.localStorage.removeItem('loggedBlogappUser')
         setErrorMessage('Session expired. Please log in again.')
         setTimeout(() => {
@@ -41,83 +50,6 @@ const App = () => {
     }
   }, [])
 
-  const noteFormRef = useRef()
-
-  const addNote = (noteObject) => {
-    noteFormRef.current.toggleVisibility()
-    noteService
-      .create(noteObject)
-      .then((returnedNote) => {
-        setNotes(notes.concat(returnedNote))
-
-        setNotification(`Added ${returnedNote.content}`)
-        setTimeout(() => {
-          setNotification(null)
-        }, 5000)
-      })
-      .catch((error) => {
-        console.log(error.response.data.error)
-
-        setErrorMessage(`${error.response.data.error}`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-        if (error.response.data.error === 'token expired') {
-          setUser(null)
-          window.localStorage.removeItem('loggedBlogappUser')
-        }
-      })
-  }
-
-  const notesToShow = showAll ? notes : notes.filter((note) => note.important)
-
-  const toggleImportanceOf = (id) => {
-    const note = notes.find((n) => n.id === id)
-    const changedNote = { ...note, important: !note.important }
-
-    noteService
-      .update(id, changedNote)
-      .then((returnedNote) => {
-        if (returnedNote === null) {
-          setErrorMessage(
-            `Note '${note.content}' was already removed from server`
-          )
-          setTimeout(() => {
-            setErrorMessage(null)
-          }, 5000)
-          setNotes(notes.filter((n) => n.id !== id))
-        } else {
-          setNotes(notes.map((note) => (note.id !== id ? note : returnedNote)))
-        }
-      })
-      .catch((error) => {
-        setErrorMessage(`${error.response.data.error}`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-        setNotes(notes.filter((n) => n.id !== id))
-      })
-  }
-  const deleteNote = (id) => {
-    const note = notes.find((n) => n.id === id)
-    if (!note) {
-      setErrorMessage(`Note '${note.content}' was already removed from server`)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-      return
-    }
-    noteService
-      .deleteNote(id)
-      .then(() => setNotes(notes.filter((n) => n.id !== id)))
-      .catch((error) => {
-        setErrorMessage(`Error deleting the note: ${error.message}`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-      })
-  }
-
   const handleLogin = async (username, password) => {
     try {
       const user = await loginService.login({ username, password })
@@ -125,7 +57,7 @@ const App = () => {
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
 
       noteService.setToken(user.token)
-      setUser(user)
+      dispatch(setUser(user))
       setNotification(`Hello ${user.name}👋`)
       setTimeout(() => {
         setNotification(null)
@@ -137,6 +69,8 @@ const App = () => {
       }, 5000)
     }
   }
+
+  const noteFormRef = useRef()
 
   return (
     <div>
@@ -152,28 +86,17 @@ const App = () => {
         <div>
           <p>{user.name} logged in</p>
           <Togglable buttonLabel="new note" ref={noteFormRef}>
-            <NoteForm createNote={addNote} />
+            <NoteForm
+              noteFormRef={noteFormRef}
+              setNotification={setNotification}
+              setErrorMessage={setErrorMessage} />
           </Togglable>
         </div>
       )}
       <div>
-        <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? 'important' : 'all'}
-        </button>
+        <VisibilityFilter />
+        <Notes />
       </div>
-      <ul>
-        <ul>
-          {notesToShow.map((note) => (
-            <Note
-              key={note.id}
-              note={note}
-              toggleImportance={() => toggleImportanceOf(note.id)}
-              deleteNote={() => deleteNote(note.id)}
-            />
-          ))}
-        </ul>
-      </ul>
-
       <Footer />
     </div>
   )

@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { toggleImportance, delNote } from '../actions/noteActions'
 
-const Note = ({ note, toggleImportance, deleteNote }) => {
+
+const Note = ({ note, handleClick, deleteNote }) => {
   const [showModal, setShowModal] = useState(false)
   const label = note.important ? 'make not important' : 'make important'
 
@@ -13,7 +16,7 @@ const Note = ({ note, toggleImportance, deleteNote }) => {
   return (
     <li className="note">
       {note.content}
-      <button onClick={toggleImportance}>{label}</button>
+      <button onClick={handleClick}>{label}</button>
       <button
         type="button"
         onClick={() => handleDeletion()}
@@ -42,4 +45,35 @@ const Note = ({ note, toggleImportance, deleteNote }) => {
   )
 }
 
-export default Note
+
+
+const Notes = () => {
+  const dispatch = useDispatch()
+  const notes = useSelector(state => {
+    if (state.filter === 'ALL') {
+      return state.notes
+    }
+    return state.filter === 'IMPORTANT'
+      ? state.notes.filter(note => note.important)
+      : state.notes.filter(note => !note.important)
+  })
+
+  return (
+    <ul>
+      {notes.map(note =>
+        <Note
+          key={note.id}
+          note={note}
+          handleClick={() =>
+            dispatch(toggleImportance(note.id))
+          }
+          deleteNote={() => dispatch(delNote(note.id))}
+        />
+      )}
+    </ul>
+
+
+  )
+}
+
+export default Notes
