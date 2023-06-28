@@ -95,7 +95,8 @@ const App = () => {
       )}
       <div>
         <VisibilityFilter />
-        <Notes />
+        <Notes
+          setErrorMessage={setErrorMessage} />
       </div>
       <Footer />
     </div>

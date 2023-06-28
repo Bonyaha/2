@@ -1,6 +1,6 @@
 import noteService from '../services/notes'
-import Notification from '../components/Notification'
-import ErrorNotification from '../components/ErrorNotification'
+
+
 
 export const initializeNotes = () => {
   return async (dispatch) => {
@@ -29,6 +29,7 @@ export const addNewNote = (noteObject) => {
 
 export const toggleImportance = (id) => {
   return async (dispatch, getState) => {
+    console.log('id: ', id);
     const notes = getState().notes
     const note = notes.find((n) => n.id === id)
     const changedNote = { ...note, important: !note.important }
