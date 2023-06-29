@@ -8,11 +8,6 @@ const notesReducer = (state = [], action) => {
 
     case 'TOGGLE_IMPORTANCE':
       const id = action.payload.id
-      /* const noteToChange = state.find((n) => n.id === id)
-      const changedNote = {
-        ...noteToChange,
-        important: !noteToChange.important,
-      } */
       return state.map((note) => (note.id !== id ? note : action.payload))
     case 'DELETE_NOTE':
       return state.filter((note) => note.id !== action.payload)
