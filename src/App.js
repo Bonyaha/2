@@ -14,7 +14,7 @@ import VisibilityFilter from './components/VisibilityFilter'
 import {
   initializeNotes,
 
-} from './actions/noteActions'
+} from './reducers/noteReducer'
 
 import { setUser, logout } from './actions/userActions'
 
