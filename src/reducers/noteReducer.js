@@ -12,8 +12,14 @@ export const initializeNotes = createAsyncThunk(
 export const addNewNote = createAsyncThunk(
   'notes/addNewNote',
   async (noteObject) => {
-    const returnedNote = await noteService.create(noteObject);
-    return returnedNote;
+    try {
+      const returnedNote = await noteService.create(noteObject);
+      console.log('returnedNote', returnedNote);
+      return returnedNote;
+    } catch (error) {
+      console.log('ERROR');
+      throw new Error(error.response.data.error); // Throw the error message
+    }
   }
 );
 
@@ -48,6 +54,9 @@ const notesSlice = createSlice({
       .addCase(addNewNote.fulfilled, (state, action) => {
         state.push(action.payload);
       })
+      /* .addCase(addNewNote.rejected, (state, action) => {
+        console.log(action)
+      }) */
       .addCase(toggleImportance.fulfilled, (state, action) => {
         const index = state.findIndex((note) => note.id === action.payload.id);
         if (index !== -1) {

@@ -17,13 +17,13 @@ const NoteForm = ({ noteFormRef, setNotification, setErrorMessage }) => {
         content,
         important: true,
       }));
-      setNotification(`Added ${content}`);
+      /* setNotification(`Added ${content}`);
       setTimeout(() => {
         setNotification(null);
-      }, 5000);
+      }, 5000); */
     } catch (error) {
       console.log(error);
-      setErrorMessage(`${error.message}`);
+      setErrorMessage(`Error: ${error.message}`);
       setTimeout(() => {
         setErrorMessage(null);
       }, 5000);
