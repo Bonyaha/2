@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleImportance, delNote } from '../reducers/noteReducer'
-
+/* Test */
 const Note = ({ note, handleClick, deleteNote }) => {
   const [showModal, setShowModal] = useState(false);
   const label = note.important ? 'make not important' : 'make important';
