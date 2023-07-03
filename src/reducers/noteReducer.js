@@ -4,22 +4,22 @@ import noteService from '../services/notes';
 export const initializeNotes = createAsyncThunk(
   'notes/initializeNotes',
   async () => {
-    const initialNotes = await noteService.getAll();
-    return initialNotes;
+    try {
+      const initialNotes = await noteService.getAll();
+      console.log('initialNotes are: ', initialNotes);
+      return initialNotes;
+    } catch (error) {
+      console.log('error', error);
+    }
+
   }
 );
-
 export const addNewNote = createAsyncThunk(
   'notes/addNewNote',
   async (noteObject) => {
-    try {
-      const returnedNote = await noteService.create(noteObject);
-      console.log('returnedNote', returnedNote);
-      return returnedNote;
-    } catch (error) {
-      console.log('ERROR');
-      throw new Error(error.response.data.error); // Throw the error message
-    }
+    const response = await noteService.create(noteObject);
+    console.log('response is ', response);
+    return response;
   }
 );
 
@@ -42,6 +42,7 @@ export const delNote = createAsyncThunk(
   }
 );
 
+
 const notesSlice = createSlice({
   name: 'notes',
   initialState: [],
@@ -51,12 +52,15 @@ const notesSlice = createSlice({
       .addCase(initializeNotes.fulfilled, (state, action) => {
         return action.payload;
       })
+
       .addCase(addNewNote.fulfilled, (state, action) => {
         state.push(action.payload);
+
       })
-      /* .addCase(addNewNote.rejected, (state, action) => {
-        console.log(action)
-      }) */
+      .addCase(addNewNote.rejected, (state, action) => {
+        console.log('hey');
+        console.log('Server error:', action);
+      })
       .addCase(toggleImportance.fulfilled, (state, action) => {
         const index = state.findIndex((note) => note.id === action.payload.id);
         if (index !== -1) {

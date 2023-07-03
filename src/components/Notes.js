@@ -48,6 +48,7 @@ const Notes = ({ setErrorMessage }) => {
   const dispatch = useDispatch();
   const notes = useSelector((state) => {
     if (state.filter === 'ALL') {
+      console.log('notes are: ', state.notes);
       return state.notes;
     }
     return state.filter === 'IMPORTANT'

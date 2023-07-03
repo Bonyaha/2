@@ -13,7 +13,7 @@ const NoteForm = ({ noteFormRef, setNotification, setErrorMessage }) => {
       event.preventDefault();
       const content = event.target.note.value;
       event.target.note.value = '';
-      await dispatch(addNewNote({
+      dispatch(addNewNote({
         content,
         important: true,
       }));

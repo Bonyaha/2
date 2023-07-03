@@ -14,7 +14,8 @@ const store = configureStore({
   reducer: {
     notes: noteReducer,
     user: userReducer,
-    filter: filterReducer
+    filter: filterReducer,
+
   }
 
 })
