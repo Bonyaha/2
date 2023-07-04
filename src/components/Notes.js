@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { toggleImportance, delNote } from '../actions/noteActions'
+import { toggleImportanceOf, deleteNote } from '../reducers/noteReducer'
 
 
-const Note = ({ note, handleClick, deleteNote }) => {
+const Note = ({ note, handleClick, delNote }) => {
   const [showModal, setShowModal] = useState(false)
   const label = note.important ? 'make not important' : 'make important'
 
@@ -34,7 +34,7 @@ const Note = ({ note, handleClick, deleteNote }) => {
               <button className="cancel-button" onClick={cancelDeletion}>
                 Cancel
               </button>
-              <button className="delete-button" onClick={deleteNote}>
+              <button className="delete-button" onClick={delNote}>
                 Delete
               </button>
             </div>
@@ -58,7 +58,7 @@ const Notes = ({ setErrorMessage }) => {
       : state.notes.filter(note => !note.important)
   })
 
-  const deleteNote = async (id) => {
+  const delNote = async (id) => {
     const note = notes.find((n) => n.id === id)
     if (!note) {
       setErrorMessage(`Note '${note.content}' was already removed from server`)
@@ -68,7 +68,7 @@ const Notes = ({ setErrorMessage }) => {
       return
     }
     try {
-      await dispatch(delNote(id))
+      await dispatch(deleteNote(id))
     } catch (error) {
       setErrorMessage(`Error deleting the note: ${error.message}`)
       setTimeout(() => {
@@ -77,10 +77,10 @@ const Notes = ({ setErrorMessage }) => {
     }
   }
 
-  const toggleImportanceOf = async (id, content) => {
+  const toggleImportance = async (id, content) => {
     try {
       console.log('start');
-      const returnedNote = await dispatch(toggleImportance(id))
+      const returnedNote = await dispatch(toggleImportanceOf(id))
       console.log('returnedNote is ', returnedNote);
 
     } catch (error) {
@@ -92,7 +92,7 @@ const Notes = ({ setErrorMessage }) => {
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
-      dispatch(delNote(id))
+      dispatch(deleteNote(id))
     }
   }
 
@@ -103,8 +103,8 @@ const Notes = ({ setErrorMessage }) => {
         <Note
           key={note.id}
           note={note}
-          handleClick={() => toggleImportanceOf(note.id, note.content)}
-          deleteNote={() => deleteNote(note.id)}
+          handleClick={() => toggleImportance(note.id, note.content)}
+          delNote={() => delNote(note.id)}
         />
       )}
     </ul>

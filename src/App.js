@@ -11,12 +11,9 @@ import NoteForm from './components/NoteForm'
 import Togglable from './components/Togglable'
 import VisibilityFilter from './components/VisibilityFilter'
 
-import {
-  initializeNotes,
+import { initializeNotes } from './reducers/noteReducer'
 
-} from './actions/noteActions'
-
-import { setUser, logout } from './actions/userActions'
+import { setUser, logOut } from './reducers/userReducer'
 
 
 const App = () => {
