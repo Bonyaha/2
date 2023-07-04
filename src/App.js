@@ -37,7 +37,7 @@ const App = () => {
       noteService.setToken(user.token)
       const tokenExpirationTime = new Date(user.expirationTime)
       if (tokenExpirationTime < new Date()) {
-        dispatch(logout())
+        dispatch(logOut())
         window.localStorage.removeItem('loggedBlogappUser')
         setErrorMessage('Session expired. Please log in again.')
         setTimeout(() => {
