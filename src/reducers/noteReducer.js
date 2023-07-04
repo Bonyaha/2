@@ -11,7 +11,6 @@ export const initializeNotes = createAsyncThunk(
     } catch (error) {
       console.log('error', error);
     }
-
   }
 );
 
@@ -26,11 +25,9 @@ export const addNewNote = createAsyncThunk(
       if (error.response) {
         // If the error has a response from the server
         const serverResponse = error.response.data;
-        console.log('Server error:', serverResponse);
         throw new Error(serverResponse.error); // Throw the server response as the error payload
       } else {
         // If it's a generic error without a response
-        console.log('Generic error:', error.message);
         throw new Error(error.message); // Throw a generic error message as the error payload
       }
     }
@@ -72,8 +69,6 @@ const notesSlice = createSlice({
 
       })
       .addCase(addNewNote.rejected, (state, action) => {
-        console.log('hey');
-        console.log('Server error:', action.error.message);
         throw new Error(action.error.message);
       })
       .addCase(toggleImportance.fulfilled, (state, action) => {
