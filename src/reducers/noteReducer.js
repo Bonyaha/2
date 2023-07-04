@@ -74,6 +74,7 @@ const notesSlice = createSlice({
       .addCase(addNewNote.rejected, (state, action) => {
         console.log('hey');
         console.log('Server error:', action.error.message);
+        throw new Error(action.error.message);
       })
       .addCase(toggleImportance.fulfilled, (state, action) => {
         const index = state.findIndex((note) => note.id === action.payload.id);

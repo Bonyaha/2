@@ -8,22 +8,23 @@ const NoteForm = ({ noteFormRef, setNotification, setErrorMessage }) => {
   const dispatch = useDispatch()
 
   const addNote = async (event) => {
+
+    noteFormRef.current.toggleVisibility();
+    event.preventDefault();
+    const content = event.target.note.value;
+    event.target.note.value = '';
     try {
-      noteFormRef.current.toggleVisibility();
-      event.preventDefault();
-      const content = event.target.note.value;
-      event.target.note.value = '';
-      dispatch(addNewNote({
+      await dispatch(addNewNote({
         content,
         important: true,
       }));
-      /* setNotification(`Added ${content}`);
+      setNotification(`Added ${content}`);
       setTimeout(() => {
         setNotification(null);
-      }, 5000); */
+      }, 5000);
     } catch (error) {
       console.log(error);
-      setErrorMessage(`Error: ${error.message}`);
+      setErrorMessage(`${error.message}`);
       setTimeout(() => {
         setErrorMessage(null);
       }, 5000);
