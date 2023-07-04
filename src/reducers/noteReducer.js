@@ -36,11 +36,9 @@ export const addNewNote = createAsyncThunk(
 
 export const toggleImportance = createAsyncThunk(
   'notes/toggleImportance',
-  async (id, { getState }) => {
-    const notes = getState().notes;
-    const note = notes.find((n) => n.id === id);
+  async (note) => {
     const changedNote = { ...note, important: !note.important };
-    const returnedNote = await noteService.update(id, changedNote);
+    const returnedNote = await noteService.update(note.id, changedNote);
     return returnedNote;
   }
 );
@@ -66,7 +64,6 @@ const notesSlice = createSlice({
 
       .addCase(addNewNote.fulfilled, (state, action) => {
         state.push(action.payload);
-
       })
       .addCase(addNewNote.rejected, (state, action) => {
         throw new Error(action.error.message);
@@ -77,9 +74,15 @@ const notesSlice = createSlice({
           state[index] = action.payload;
         }
       })
+      .addCase(toggleImportance.rejected, (state, action) => {
+        throw new Error(action.error.message);
+      })
       .addCase(delNote.fulfilled, (state, action) => {
         return state.filter((note) => note.id !== action.payload);
-      });
+      })
+      .addCase(delNote.rejected, (state, action) => {
+        throw new Error(action.error.message);
+      })
   },
 });
 

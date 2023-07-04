@@ -73,8 +73,8 @@ const Notes = ({ setErrorMessage }) => {
     });
   };
 
-  const toggleImportanceOf = (id, content) => {
-    dispatch(toggleImportance(id)).catch((error) => {
+  const toggleImportanceOf = (note, content) => {
+    dispatch(toggleImportance(note)).catch((error) => {
       if (
         error.response &&
         error.response.data &&
@@ -87,7 +87,7 @@ const Notes = ({ setErrorMessage }) => {
       setTimeout(() => {
         setErrorMessage(null);
       }, 5000);
-      dispatch(delNote(id));
+      dispatch(delNote(note.id));
     });
   };
 
@@ -97,7 +97,7 @@ const Notes = ({ setErrorMessage }) => {
         <Note
           key={note.id}
           note={note}
-          handleClick={() => toggleImportanceOf(note.id, note.content)}
+          handleClick={() => toggleImportanceOf(note, note.content)}
           deleteNote={() => deleteNote(note.id)}
         />
       ))}
