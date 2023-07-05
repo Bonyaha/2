@@ -31,23 +31,42 @@ export const addNewNote = createAsyncThunk(
         throw new Error(error.message); // Throw a generic error message as the error payload
       }
     }
+
   }
 );
 
 export const toggleImportance = createAsyncThunk(
   'notes/toggleImportance',
   async (note) => {
-    const changedNote = { ...note, important: !note.important };
-    const returnedNote = await noteService.update(note.id, changedNote);
-    return returnedNote;
+    try {
+      const changedNote = { ...note, important: !note.important };
+      const returnedNote = await noteService.update(note.id, changedNote);
+      return returnedNote;
+    } catch (error) {
+      if (error.response) {
+        const serverResponse = error.response.data;
+        throw new Error(serverResponse.error);
+      } else {
+        throw new Error(error.message);
+      }
+    }
   }
 );
 
 export const delNote = createAsyncThunk(
   'notes/delNote',
   async (id) => {
-    await noteService.deleteNote(id);
-    return id;
+    try {
+      await noteService.deleteNote(id);
+      return id;
+    } catch (error) {
+      if (error.response) {
+        const serverResponse = error.response.data;
+        throw new Error(serverResponse.error);
+      } else {
+        throw new Error(error.message);
+      }
+    }
   }
 );
 
@@ -66,6 +85,7 @@ const notesSlice = createSlice({
         state.push(action.payload);
       })
       .addCase(addNewNote.rejected, (state, action) => {
+        console.log('action.error.message is', action.error.message);
         throw new Error(action.error.message);
       })
       .addCase(toggleImportance.fulfilled, (state, action) => {
