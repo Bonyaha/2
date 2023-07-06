@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux'
 import { addNewNote } from '../actions/noteActions'
-
+import { logOut } from '../actions/userActions'
 
 
 const NoteForm = ({ noteFormRef, setNotification, setErrorMessage }) => {
@@ -29,7 +29,7 @@ const NoteForm = ({ noteFormRef, setNotification, setErrorMessage }) => {
       }, 5000);
 
       if (error.response.data.error === 'token expired') {
-        dispatch(logout());
+        dispatch(logOut());
         window.localStorage.removeItem('loggedNoteappUser');
       }
     }
