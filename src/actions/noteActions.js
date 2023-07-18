@@ -10,8 +10,6 @@ export const initializeNotes = () => {
       type: 'SET_NOTES',
       payload: initialNotes,
     })
-
-
   }
 }
 
