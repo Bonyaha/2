@@ -79,9 +79,9 @@ const Notes = ({ setErrorMessage }) => {
 
   const toggleImportance = async (id, content) => {
     try {
-      console.log('start');
+      console.log('start')
       const returnedNote = await dispatch(toggleImportanceOf(id))
-      console.log('returnedNote is ', returnedNote);
+      console.log('returnedNote is ', returnedNote)
 
     } catch (error) {
       if (error.response && error.response.data && error.response.data.error) {
