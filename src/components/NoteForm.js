@@ -1,5 +1,6 @@
 import { useDispatch } from 'react-redux'
 import { addNewNote } from '../reducers/noteReducer'
+import { logout } from '../actions/userActions'
 
 
 
@@ -9,32 +10,32 @@ const NoteForm = ({ noteFormRef, setNotification, setErrorMessage }) => {
 
   const addNote = async (event) => {
 
-    noteFormRef.current.toggleVisibility();
-    event.preventDefault();
-    const content = event.target.note.value;
-    event.target.note.value = '';
+    noteFormRef.current.toggleVisibility()
+    event.preventDefault()
+    const content = event.target.note.value
+    event.target.note.value = ''
     try {
       await dispatch(addNewNote({
         content,
         important: true,
-      }));
-      setNotification(`Added ${content}`);
+      }))
+      setNotification(`Added ${content}`)
       setTimeout(() => {
-        setNotification(null);
-      }, 5000);
+        setNotification(null)
+      }, 5000)
     } catch (error) {
-      console.log(error);
-      setErrorMessage(`${error.message}`);
+      console.log(error)
+      setErrorMessage(`${error.message}`)
       setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
+        setErrorMessage(null)
+      }, 5000)
 
       if (error.message === 'token expired') {
-        dispatch(logout());
-        window.localStorage.removeItem('loggedNoteappUser');
+        dispatch(logout())
+        window.localStorage.removeItem('loggedNoteappUser')
       }
     }
-  };
+  }
 
 
   return (

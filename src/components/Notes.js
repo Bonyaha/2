@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { toggleImportance, delNote } from '../reducers/noteReducer'
-/* Test */
+
 const Note = ({ note, handleClick, deleteNote }) => {
-  const [showModal, setShowModal] = useState(false);
-  const label = note.important ? 'make not important' : 'make important';
+  const [showModal, setShowModal] = useState(false)
+  const label = note.important ? 'make not important' : 'make important'
 
   const handleDeletion = () => {
-    setShowModal(true);
-  };
+    setShowModal(true)
+  }
   const cancelDeletion = () => {
-    setShowModal(false);
-  };
+    setShowModal(false)
+  }
   return (
     <li className="note">
       {note.content}
@@ -41,37 +41,37 @@ const Note = ({ note, handleClick, deleteNote }) => {
         </div>
       )}
     </li>
-  );
-};
+  )
+}
 
 const Notes = ({ setErrorMessage }) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
   const notes = useSelector((state) => {
     if (state.filter === 'ALL') {
-      console.log('notes are: ', state.notes);
-      return state.notes;
+      console.log('notes are: ', state.notes)
+      return state.notes
     }
     return state.filter === 'IMPORTANT'
       ? state.notes.filter((note) => note.important)
-      : state.notes.filter((note) => !note.important);
-  });
+      : state.notes.filter((note) => !note.important)
+  })
 
   const deleteNote = (id) => {
-    const note = notes.find((n) => n.id === id);
+    const note = notes.find((n) => n.id === id)
     if (!note) {
-      setErrorMessage(`Note '${note.content}' was already removed from server`);
+      setErrorMessage(`Note '${note.content}' was already removed from server`)
       setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
-      return;
+        setErrorMessage(null)
+      }, 5000)
+      return
     }
     dispatch(delNote(id)).catch((error) => {
-      setErrorMessage(`Error deleting the note: ${error.message}`);
+      setErrorMessage(`Error deleting the note: ${error.message}`)
       setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
-    });
-  };
+        setErrorMessage(null)
+      }, 5000)
+    })
+  }
 
   const toggleImportanceOf = (note, content) => {
     dispatch(toggleImportance(note)).catch((error) => {
@@ -80,16 +80,16 @@ const Notes = ({ setErrorMessage }) => {
         error.response.data &&
         error.response.data.error
       ) {
-        setErrorMessage(`${error.response.data.error}`);
+        setErrorMessage(`${error.response.data.error}`)
       } else {
-        setErrorMessage(`Note '${content}' was already removed from server`);
+        setErrorMessage(`Note '${content}' was already removed from server`)
       }
       setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
-      dispatch(delNote(note.id));
-    });
-  };
+        setErrorMessage(null)
+      }, 5000)
+      dispatch(delNote(note.id))
+    })
+  }
 
   return (
     <ul>
@@ -102,7 +102,7 @@ const Notes = ({ setErrorMessage }) => {
         />
       ))}
     </ul>
-  );
-};
+  )
+}
 
-export default Notes;
+export default Notes
