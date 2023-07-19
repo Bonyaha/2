@@ -8,7 +8,7 @@ import loginService from './services/login'
 import LoginForm from './components/LoginForm'
 import NoteForm from './components/NoteForm'
 import Togglable from './components/Togglable'
-import { useQuery } from 'react-query'
+import { useQuery, useMutation } from 'react-query'
 //import axios from 'axios'
 
 
@@ -19,12 +19,6 @@ const App = () => {
   const [notification, setNotification] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [user, setUser] = useState(null)
-
-  /*  useEffect(() => {
-     noteService.getAll().then((initialNotes) => {
-       setNotes(initialNotes)
-     })
-   }, []) */
 
 
   useEffect(() => {
@@ -55,31 +49,34 @@ const App = () => {
 
   const noteFormRef = useRef()
 
-  /* const addNote = (noteObject) => {
+  const newNoteMutation = useMutation(noteService
+    .create)
+
+  const addNote = (noteObject) => {
     noteFormRef.current.toggleVisibility()
-    noteService
-      .create(noteObject)
-      .then((returnedNote) => {
-        setNotes(notes.concat(returnedNote))
+    /*  noteService
+       .create(noteObject)
+       .then((returnedNote) => {
+         setNotes(notes.concat(returnedNote)) */
+    newNoteMutation.mutate(noteObject)
+    setNotification(`Added ${noteObject.content}`)
+    setTimeout(() => {
+      setNotification(null)
+    }, 5000)
 
-        setNotification(`Added ${returnedNote.content}`)
-        setTimeout(() => {
-          setNotification(null)
-        }, 5000)
-      })
-      .catch((error) => {
-        console.log(error.response.data.error)
+    /* .catch((error) => {
+      console.log(error.response.data.error)
 
-        setErrorMessage(`${error.response.data.error}`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-        if (error.response.data.error === 'token expired') {
-          setUser(null)
-          window.localStorage.removeItem('loggedBlogappUser')
-        }
-      })
-  } */
+      setErrorMessage(`${error.response.data.error}`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+      if (error.response.data.error === 'token expired') {
+        setUser(null)
+        window.localStorage.removeItem('loggedBlogappUser')
+      }
+    }) */
+  }
 
   const notesToShow = showAll ? notes : notes.filter((note) => note.important)
 
@@ -164,7 +161,7 @@ const App = () => {
         <div>
           <p>{user.name} logged in</p>
           <Togglable buttonLabel="new note" ref={noteFormRef}>
-            <NoteForm /* createNote={addNote} */ />
+            <NoteForm createNote={addNote} />
           </Togglable>
         </div>
       )}
