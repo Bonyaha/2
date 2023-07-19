@@ -8,20 +8,24 @@ import loginService from './services/login'
 import LoginForm from './components/LoginForm'
 import NoteForm from './components/NoteForm'
 import Togglable from './components/Togglable'
+import { useQuery } from 'react-query'
+//import axios from 'axios'
+
 
 const App = () => {
-  const [notes, setNotes] = useState([])
+  const [, setNotes] = useState([])
 
   const [showAll, setShowAll] = useState(true)
   const [notification, setNotification] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [user, setUser] = useState(null)
 
-  useEffect(() => {
-    noteService.getAll().then((initialNotes) => {
-      setNotes(initialNotes)
-    })
-  }, [])
+  /*  useEffect(() => {
+     noteService.getAll().then((initialNotes) => {
+       setNotes(initialNotes)
+     })
+   }, []) */
+
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
@@ -40,6 +44,14 @@ const App = () => {
       }
     }
   }, [])
+
+  const result = useQuery('notes', () => noteService.getAll().then(initialNotes => initialNotes.data))
+
+  console.log(result)
+
+  if (result.isLoading) { return <div>loading data...</div> }
+
+  const notes = result.data
 
   const noteFormRef = useRef()
 
