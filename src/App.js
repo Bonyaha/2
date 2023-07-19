@@ -13,7 +13,7 @@ import { useQuery } from 'react-query'
 
 
 const App = () => {
-  const [, setNotes] = useState([])
+  //const [, setNotes] = useState([])
 
   const [showAll, setShowAll] = useState(true)
   const [notification, setNotification] = useState(null)
@@ -45,9 +45,9 @@ const App = () => {
     }
   }, [])
 
-  const result = useQuery('notes', () => noteService.getAll().then(initialNotes => initialNotes.data))
+  const result = useQuery('notes', () => noteService.getAll().then(initialNotes => initialNotes))
 
-  console.log(result)
+  console.log(result.data)
 
   if (result.isLoading) { return <div>loading data...</div> }
 
@@ -55,7 +55,7 @@ const App = () => {
 
   const noteFormRef = useRef()
 
-  const addNote = (noteObject) => {
+  /* const addNote = (noteObject) => {
     noteFormRef.current.toggleVisibility()
     noteService
       .create(noteObject)
@@ -79,11 +79,11 @@ const App = () => {
           window.localStorage.removeItem('loggedBlogappUser')
         }
       })
-  }
+  } */
 
   const notesToShow = showAll ? notes : notes.filter((note) => note.important)
 
-  const toggleImportanceOf = (id) => {
+  /* const toggleImportanceOf = (id) => {
     const note = notes.find((n) => n.id === id)
     const changedNote = { ...note, important: !note.important }
 
@@ -109,8 +109,8 @@ const App = () => {
         }, 5000)
         setNotes(notes.filter((n) => n.id !== id))
       })
-  }
-  const deleteNote = (id) => {
+  } */
+  /* const deleteNote = (id) => {
     const note = notes.find((n) => n.id === id)
     if (!note) {
       setErrorMessage(`Note '${note.content}' was already removed from server`)
@@ -128,7 +128,7 @@ const App = () => {
           setErrorMessage(null)
         }, 5000)
       })
-  }
+  } */
 
   const handleLogin = async (username, password) => {
     try {
@@ -164,7 +164,7 @@ const App = () => {
         <div>
           <p>{user.name} logged in</p>
           <Togglable buttonLabel="new note" ref={noteFormRef}>
-            <NoteForm createNote={addNote} />
+            <NoteForm /* createNote={addNote} */ />
           </Togglable>
         </div>
       )}
@@ -179,8 +179,8 @@ const App = () => {
             <Note
               key={note.id}
               note={note}
-              toggleImportance={() => toggleImportanceOf(note.id)}
-              deleteNote={() => deleteNote(note.id)}
+            /* toggleImportance={() => toggleImportanceOf(note.id)} */
+            //deleteNote={() => deleteNote(note.id)}
             />
           ))}
         </ul>
