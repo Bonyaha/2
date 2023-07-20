@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useContext } from 'react'
 import Note from './components/Note'
 import Notification from './components/Notification'
 import ErrorNotification from './components/ErrorNotification'
@@ -9,29 +9,39 @@ import LoginForm from './components/LoginForm'
 import NoteForm from './components/NoteForm'
 import Togglable from './components/Togglable'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
-//import axios from 'axios'
-
+import AppContext from './AppContext'
 
 const App = () => {
   const queryClient = useQueryClient()
+  const [state, dispatch] = useContext(AppContext) // Get state and dispatch from context
+  console.log(state)
+  const { user, notification, errorMessage } = state
 
   const newNoteMutation = useMutation(noteService
     .create, {
     onSuccess: (noteObject) => {
       queryClient.invalidateQueries('notes'),
-        setNotification(`Added ${noteObject.content
-          }`)
+        dispatch({
+          type: 'SET_NOTIFICATION', payload: `Added ${noteObject.content
+            }`
+        })
       setTimeout(() => {
-        setNotification(null)
+        dispatch({
+          type: 'SET_NOTIFICATION', payload: null
+        })
       }, 5000)
     },
     onError: (error) => {
-      setErrorMessage(`${error.response.data.error}`)
+      dispatch({
+        type: 'SET_ERROR_MESSAGE', payload: `${error.response.data.error}`
+      })
       setTimeout(() => {
-        setErrorMessage(null)
+        dispatch({
+          type: 'SET_ERROR_MESSAGE', payload: null
+        })
       }, 5000)
       if (error.response.data.error === 'token expired') {
-        setUser(null)
+        dispatch({ type: 'SET_USER', payload: null })
         window.localStorage.removeItem('loggedBlogappUser')
       }
     }
@@ -50,9 +60,14 @@ const App = () => {
       )
     },
     onError: (error, { id }) => {
-      setErrorMessage(`${error.response.data.error}`)
+      dispatch({
+        type: 'SET_ERROR_MESSAGE', payload: `${error.response.data.error}`
+      })
+
       setTimeout(() => {
-        setErrorMessage(null)
+        dispatch({
+          type: 'SET_ERROR_MESSAGE', payload: null
+        })
       }, 5000)
       queryClient.setQueryData('notes', (oldData) =>
         oldData.filter((n) => n.id !== id)
@@ -71,42 +86,50 @@ const App = () => {
       console.log(id)
       const note = notes.find((n) => n.id === id)
       queryClient.invalidateQueries('notes'),
-        setNotification(`Deleted ${note.content}`)
+        dispatch({
+          type: 'SET_NOTIFICATION', payload: `Deleted ${note.content}`
+        })
       setTimeout(() => {
-        setNotification(null)
+        dispatch({
+          type: 'SET_NOTIFICATION', payload: null
+        })
       }, 5000)
     },
     onError: (error) => {
-      setErrorMessage(`${error.response.data.error}`)
+      dispatch({
+        type: 'SET_ERROR_MESSAGE', payload: `${error.response.data.error}`
+      })
       setTimeout(() => {
-        setErrorMessage(null)
+        dispatch({
+          type: 'SET_ERROR_MESSAGE', payload: null
+        })
       }, 5000)
       if (error.response.data.error === 'token expired') {
-        setUser(null)
+        dispatch({ type: 'SET_USER', payload: null })
         window.localStorage.removeItem('loggedBlogappUser')
       }
     }
   })
 
   const [showAll, setShowAll] = useState(true)
-  const [notification, setNotification] = useState(null)
+  /* const [notification, setNotification] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(null) */
 
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      setUser(user)
+      dispatch({ type: 'SET_USER', payload: user })
       noteService.setToken(user.token)
       const tokenExpirationTime = new Date(user.expirationTime)
       if (tokenExpirationTime < new Date()) {
-        setUser(null)
+        dispatch({ type: 'SET_USER', payload: null })
         window.localStorage.removeItem('loggedBlogappUser')
-        setErrorMessage('Session expired. Please log in again.')
+        dispatch({ type: 'SET_ERROR_MESSAGE', payload: 'Session expired. Please log in again.' })
         setTimeout(() => {
-          setErrorMessage(null)
+          dispatch({ type: 'SET_ERROR_MESSAGE', payload: null })
         }, 5000)
       }
     }
@@ -140,9 +163,9 @@ const App = () => {
   const deleteNote = (id) => {
     const note = notes.find((n) => n.id === id)
     if (!note) {
-      setErrorMessage(`Note '${note.content}' was already removed from server`)
+      dispatch({ type: 'SET_ERROR_MESSAGE', payload: `Note '${note.content}' was already removed from server` })
       setTimeout(() => {
-        setErrorMessage(null)
+        dispatch({ type: 'SET_ERROR_MESSAGE', payload: null })
       }, 5000)
       return
     }
@@ -157,15 +180,15 @@ const App = () => {
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
 
       noteService.setToken(user.token)
-      setUser(user)
-      setNotification(`Hello ${user.name}👋`)
+      dispatch({ type: 'SET_USER', payload: user })
+      dispatch({ type: 'SET_NOTIFICATION', payload: `Hello ${user.name}👋` })
       setTimeout(() => {
-        setNotification(null)
+        dispatch({ type: 'SET_NOTIFICATION', payload: null })
       }, 5000)
     } catch (exception) {
-      setErrorMessage('Wrong credentials')
+      dispatch({ type: 'SET_ERROR_MESSAGE', payload: 'Wrong credentials' })
       setTimeout(() => {
-        setErrorMessage(null)
+        dispatch({ type: 'SET_ERROR_MESSAGE', payload: null })
       }, 5000)
     }
   }
