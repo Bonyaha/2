@@ -8,12 +8,85 @@ import loginService from './services/login'
 import LoginForm from './components/LoginForm'
 import NoteForm from './components/NoteForm'
 import Togglable from './components/Togglable'
-import { useQuery, useMutation } from 'react-query'
+import { useQuery, useMutation, useQueryClient } from 'react-query'
 //import axios from 'axios'
 
 
 const App = () => {
-  //const [, setNotes] = useState([])
+  const queryClient = useQueryClient()
+
+  const newNoteMutation = useMutation(noteService
+    .create, {
+    onSuccess: (noteObject) => {
+      queryClient.invalidateQueries('notes'),
+        setNotification(`Added ${noteObject.content
+          }`)
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000)
+    },
+    onError: (error) => {
+      setErrorMessage(`${error.response.data.error}`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+      if (error.response.data.error === 'token expired') {
+        setUser(null)
+        window.localStorage.removeItem('loggedBlogappUser')
+      }
+    }
+  })
+
+  const updateNoteMutation = useMutation(noteService
+    .update, {
+    onMutate: (variables) => {
+      const { id, content } = variables
+      console.log(variables)
+      return { id, content }
+    },
+    onSuccess: (returnedNote, { id }) => {
+      queryClient.setQueryData('notes', (oldData) =>
+        oldData.map((note) => (note.id !== id ? note : returnedNote))
+      )
+    },
+    onError: (error, { id }) => {
+      setErrorMessage(`${error.response.data.error}`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+      queryClient.setQueryData('notes', (oldData) =>
+        oldData.filter((n) => n.id !== id)
+      )
+
+    }
+  })
+
+  const deleteNoteMutation = useMutation(noteService
+    .deleteNote, {
+    onMutate: (variables) => {
+      console.log(variables)
+      return variables
+    },
+    onSuccess: (_, id) => {
+      console.log(id)
+      const note = notes.find((n) => n.id === id)
+      queryClient.invalidateQueries('notes'),
+        setNotification(`Deleted ${note.content}`)
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000)
+    },
+    onError: (error) => {
+      setErrorMessage(`${error.response.data.error}`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+      if (error.response.data.error === 'token expired') {
+        setUser(null)
+        window.localStorage.removeItem('loggedBlogappUser')
+      }
+    }
+  })
 
   const [showAll, setShowAll] = useState(true)
   const [notification, setNotification] = useState(null)
@@ -39,75 +112,32 @@ const App = () => {
     }
   }, [])
 
-  const result = useQuery('notes', () => noteService.getAll().then(initialNotes => initialNotes))
+  const noteFormRef = useRef()
 
-  console.log(result.data)
+
+  const result = useQuery('notes', () => noteService.getAll().then(initialNotes => initialNotes))
+  //console.log(result.data)
 
   if (result.isLoading) { return <div>loading data...</div> }
 
   const notes = result.data
 
-  const noteFormRef = useRef()
 
-  const newNoteMutation = useMutation(noteService
-    .create)
-
-  const addNote = (noteObject) => {
+  const addNote = async (noteObject) => {
     noteFormRef.current.toggleVisibility()
-    /*  noteService
-       .create(noteObject)
-       .then((returnedNote) => {
-         setNotes(notes.concat(returnedNote)) */
-    newNoteMutation.mutate(noteObject)
-    setNotification(`Added ${noteObject.content}`)
-    setTimeout(() => {
-      setNotification(null)
-    }, 5000)
-
-    /* .catch((error) => {
-      console.log(error.response.data.error)
-
-      setErrorMessage(`${error.response.data.error}`)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-      if (error.response.data.error === 'token expired') {
-        setUser(null)
-        window.localStorage.removeItem('loggedBlogappUser')
-      }
-    }) */
+    console.log(noteObject)
+    await newNoteMutation.mutate(noteObject)
   }
 
-  const notesToShow = showAll ? notes : notes.filter((note) => note.important)
 
-  /* const toggleImportanceOf = (id) => {
+  const toggleImportanceOf = (id) => {
+    console.log(id)
     const note = notes.find((n) => n.id === id)
-    const changedNote = { ...note, important: !note.important }
+    console.log(note)
+    updateNoteMutation.mutate({ ...note, important: !note.important })
+  }
 
-    noteService
-      .update(id, changedNote)
-      .then((returnedNote) => {
-        if (returnedNote === null) {
-          setErrorMessage(
-            `Note '${note.content}' was already removed from server`
-          )
-          setTimeout(() => {
-            setErrorMessage(null)
-          }, 5000)
-          setNotes(notes.filter((n) => n.id !== id))
-        } else {
-          setNotes(notes.map((note) => (note.id !== id ? note : returnedNote)))
-        }
-      })
-      .catch((error) => {
-        setErrorMessage(`${error.response.data.error}`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-        setNotes(notes.filter((n) => n.id !== id))
-      })
-  } */
-  /* const deleteNote = (id) => {
+  const deleteNote = (id) => {
     const note = notes.find((n) => n.id === id)
     if (!note) {
       setErrorMessage(`Note '${note.content}' was already removed from server`)
@@ -116,16 +146,9 @@ const App = () => {
       }, 5000)
       return
     }
-    noteService
-      .deleteNote(id)
-      .then(() => setNotes(notes.filter((n) => n.id !== id)))
-      .catch((error) => {
-        setErrorMessage(`Error deleting the note: ${error.message}`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-      })
-  } */
+    deleteNoteMutation.mutate(id)
+
+  }
 
   const handleLogin = async (username, password) => {
     try {
@@ -146,6 +169,8 @@ const App = () => {
       }, 5000)
     }
   }
+
+  const notesToShow = showAll ? notes : notes.filter((note) => note.important)
 
   return (
     <div>
@@ -176,8 +201,8 @@ const App = () => {
             <Note
               key={note.id}
               note={note}
-            /* toggleImportance={() => toggleImportanceOf(note.id)} */
-            //deleteNote={() => deleteNote(note.id)}
+              toggleImportance={() => toggleImportanceOf(note.id)}
+              deleteNote={() => deleteNote(note.id)}
             />
           ))}
         </ul>
