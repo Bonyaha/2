@@ -10,10 +10,10 @@ import NoteForm from './components/NoteForm'
 import Togglable from './components/Togglable'
 import Home from './components/Home'
 import Notes from './components/Notes'
+import Users from './components/Users'
 
 import {
-  BrowserRouter as Router,
-  Routes, Route, Link
+  Routes, Route, Link, useMatch, useNavigate
 } from 'react-router-dom'
 
 
@@ -132,19 +132,24 @@ const App = () => {
       })
   }
 
+  const navigate = useNavigate()
+
   const handleLogin = async (username, password) => {
     try {
+
       const user = await loginService.login({ username, password })
 
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
 
       noteService.setToken(user.token)
       setUser(user)
+      navigate('/')
       setNotification(`Hello ${user.name}👋`)
       setTimeout(() => {
         setNotification(null)
       }, 5000)
     } catch (exception) {
+      console.log(exception)
       setErrorMessage('Wrong credentials')
       setTimeout(() => {
         setErrorMessage(null)
@@ -152,49 +157,70 @@ const App = () => {
     }
   }
 
+  const logOut = () => {
+    window.localStorage.clear()
+    setUser(null)
+  }
+
   const notesToShow = showAll ? notes : notes.filter((note) => note.important)
 
-  return (
+  const match = useMatch('/notes/:id')
+  const note = match
+    ? notes.find(note => note.id === match.params.id)
+    : null
 
-    <Router>
+  return (
+    <>
       <Notification message={notification} />
       <ErrorNotification message={errorMessage} />
+
       <div>
         <Link style={padding} to="/">home</Link>
         <Link style={padding} to="/notes">notes</Link>
         <Link style={padding} to="/users">users</Link>
+
         {!user && (
-          /* { <Togglable buttonLabel="log in">
-             <LoginForm handleLogin={handleLogin} />
-           </Togglable> }*/
           <Link style={padding} to="/login">log in</Link>
         )}
         {user && (
           <div>
-            <p>{user.name} logged in</p>
-            {/* <Togglable buttonLabel="new note" ref={noteFormRef}>
+            <em>{user.name} logged in</em>
+            <button
+              type='submit'
+              style={{ marginLeft: '5px', marginBottom: '15px' }}
+              onClick={logOut}
+            >
+              log out
+            </button>
+            <Togglable buttonLabel="new note" ref={noteFormRef}>
               <NoteForm createNote={addNote} />
-            </Togglable> */}
+            </Togglable>
           </div>
         )}
       </div>
 
       <Routes>
-        <Route path="/notes/:id" element={<Note notes={notesToShow} />} />
-        <Route path="/notes" element={<Notes notes={notesToShow} />} />
+        <Route path="/notes/:id" element={<Note
+          note={note}
+          toggleImportance={() => toggleImportanceOf(note.id)}
+          deleteNote={() => deleteNote(note.id)} />} />
+        <Route path="/notes" element={<Notes
+          notes={notesToShow}
+          showAll={showAll}
+          setShowAll={setShowAll} />} />
         <Route path="/users" element={<Users />} />
         <Route path="/" element={<Home showAll={showAll} />} />
         <Route path="/login" element={
-          <Togglable buttonLabel="log in">
-            <LoginForm handleLogin={handleLogin} />
-          </Togglable>
+          <LoginForm handleLogin={handleLogin} />
+
         } />
+
       </Routes>
 
       <div>
         <Footer />
       </div>
-    </Router>
+    </>
   )
 }
 

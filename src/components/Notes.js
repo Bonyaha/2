@@ -1,8 +1,13 @@
 import { Link } from 'react-router-dom'
-const Notes = ({ notes }) => {
+const Notes = ({ notes, showAll, setShowAll }) => {
 	return (
 		<div>
 			<h2>Notes</h2>
+			<div>
+				<button onClick={() => setShowAll(!showAll)}>
+					show {showAll ? 'important' : 'all'}
+				</button>
+			</div>
 			<ul>
 				{notes.map((note) => (
 					/*{ <Note

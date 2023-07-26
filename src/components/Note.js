@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { useParams } from 'react-router-dom'
+
 
 
 const Note = ({ note, toggleImportance, deleteNote }) => {
   const [showModal, setShowModal] = useState(false)
+  console.log(note)
   const label = note.important ? 'make not important' : 'make important'
 
   const handleDeletion = () => {
