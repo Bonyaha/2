@@ -11,7 +11,7 @@ import Togglable from './components/Togglable'
 import Home from './components/Home'
 import Notes from './components/Notes'
 import Users from './components/Users'
-
+import useResource from './hooks'
 import {
   Routes, Route, Link, useMatch, useNavigate
 } from 'react-router-dom'
@@ -19,23 +19,21 @@ import {
 
 
 const App = () => {
-  const [notes, setNotes] = useState([])
+
 
   const [showAll, setShowAll] = useState(true)
   const [notification, setNotification] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [user, setUser] = useState(null)
-
-
+  const token = user ? user.token : null
+  const [notes, resourceActions] = useResource(token)
   const padding = {
     padding: 5
   }
 
-
+  console.log(resourceActions)
   useEffect(() => {
-    noteService.getAll().then((initialNotes) => {
-      setNotes(initialNotes)
-    })
+    resourceActions.getAll()
   }, [])
 
   useEffect(() => {
@@ -60,11 +58,11 @@ const App = () => {
 
   const addNote = (noteObject) => {
     noteFormRef.current.toggleVisibility()
-    noteService
+    console.log(resourceActions.create)
+    resourceActions
       .create(noteObject)
       .then((returnedNote) => {
-        setNotes(notes.concat(returnedNote))
-
+        console.log(returnedNote)
         setNotification(`Added ${returnedNote.content}`)
         setTimeout(() => {
           setNotification(null)
@@ -89,7 +87,7 @@ const App = () => {
     const note = notes.find((n) => n.id === id)
     const changedNote = { ...note, important: !note.important }
 
-    noteService
+    resourceActions
       .update(id, changedNote)
       .then((returnedNote) => {
         if (returnedNote === null) {
@@ -99,9 +97,7 @@ const App = () => {
           setTimeout(() => {
             setErrorMessage(null)
           }, 5000)
-          setNotes(notes.filter((n) => n.id !== id))
-        } else {
-          setNotes(notes.map((note) => (note.id !== id ? note : returnedNote)))
+
         }
       })
       .catch((error) => {
@@ -109,7 +105,7 @@ const App = () => {
         setTimeout(() => {
           setErrorMessage(null)
         }, 5000)
-        setNotes(notes.filter((n) => n.id !== id))
+
       })
   }
   const deleteNote = (id) => {
@@ -121,15 +117,15 @@ const App = () => {
       }, 5000)
       return
     }
-    noteService
+    resourceActions
       .deleteNote(id)
-      .then(() => setNotes(notes.filter((n) => n.id !== id)))
-      .catch((error) => {
-        setErrorMessage(`Error deleting the note: ${error.message}`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-      })
+    /* .then(() => setNotes(notes.filter((n) => n.id !== id)))
+    .catch((error) => {
+      setErrorMessage(`Error deleting the note: ${error.message}`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }) */
   }
 
   const navigate = useNavigate()
