@@ -119,13 +119,20 @@ const App = () => {
     }
     resourceActions
       .deleteNote(id)
-    /* .then(() => setNotes(notes.filter((n) => n.id !== id)))
-    .catch((error) => {
-      setErrorMessage(`Error deleting the note: ${error.message}`)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-    }) */
+      .then(() => {
+        setNotification(`Deleted ${note.content} note`)
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000)
+
+      })
+      .catch((error) => {
+        setErrorMessage(`Error deleting the note: ${error.message}`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
+    navigate('/notes')
   }
 
   const navigate = useNavigate()
