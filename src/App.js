@@ -130,6 +130,7 @@ const App = () => {
           setErrorMessage(null)
         }, 5000)
       })
+    navigate('/notes')
   }
 
   const navigate = useNavigate()
