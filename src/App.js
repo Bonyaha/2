@@ -15,7 +15,7 @@ import useResource from './hooks'
 import {
   Routes, Route, Link, useMatch, useNavigate
 } from 'react-router-dom'
-
+import { Navbar, Nav } from 'react-bootstrap'
 
 
 const App = () => {
@@ -135,34 +135,6 @@ const App = () => {
 
   }
 
-  /* const deleteNote = (id) => {
-    const note = notes.find((n) => n.id === id)
-    if (!note) {
-      setErrorMessage(`Note '${note.content}' was already removed from server`)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-      return
-    }
-    resourceActions
-      .deleteNote(id)
-      .then(() => {
-        setNotification(`Deleted ${note.content} note`)
-        setTimeout(() => {
-          setNotification(null)
-        }, 5000)
-
-      })
-      .catch((error) => {
-        setErrorMessage(`Error deleting the note: ${error.message}`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-      })
-    navigate('/notes')
-  } */
-
-
   const handleLogin = async (username, password) => {
     try {
 
@@ -203,30 +175,45 @@ const App = () => {
       <Notification message={notification} />
       <ErrorNotification message={errorMessage} />
 
-      <div >
-        <Link style={padding} to="/">home</Link>
-        <Link style={padding} to="/notes">notes</Link>
-        <Link style={padding} to="/users">users</Link>
+      <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+        <Navbar.Collapse id="responsive-navbar-nav">
+          <Nav className="me-auto">
+            <Nav.Link href="#" as="span">
+              <Link style={padding} to="/">home</Link>
+            </Nav.Link>
+            <Nav.Link href="#" as="span">
+              <Link style={padding} to="/notes">notes</Link>
+            </Nav.Link>
+            <Nav.Link href="#" as="span">
+              <Link style={padding} to="/users">users</Link>
+            </Nav.Link>
+            <Nav.Link href="#" as="span">
+              {user
+                ? <div>
+                  <em>{user.name} logged in</em>
+                  <button
+                    type='submit'
+                    style={{ marginLeft: '5px', marginBottom: '15px' }}
+                    onClick={logOut}
+                  >
+                    log out
+                  </button>
 
-        {!user && (
-          <Link style={padding} to="/login">log in</Link>
-        )}
-        {user && (
-          <div>
-            <em>{user.name} logged in</em>
-            <button
-              type='submit'
-              style={{ marginLeft: '5px', marginBottom: '15px' }}
-              onClick={logOut}
-            >
-              log out
-            </button>
-            <Togglable buttonLabel="new note" ref={noteFormRef}>
-              <NoteForm createNote={addNote} />
-            </Togglable>
-          </div>
-        )}
-      </div>
+                </div>
+                : <Link style={padding} to="/login">login</Link>
+              }
+            </Nav.Link>
+          </Nav>
+        </Navbar.Collapse>
+      </Navbar>
+      {user && (
+        <div style={{ marginTop: '10px' }}>
+          <Togglable buttonLabel="new note" ref={noteFormRef}>
+            <NoteForm createNote={addNote} />
+          </Togglable>
+        </div>
+      )}
 
       <Routes>
 
