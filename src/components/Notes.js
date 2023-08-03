@@ -6,13 +6,11 @@ const Notes = ({ notes, showAll, setShowAll }) => {
 	return (
 		<div>
 			<h2>Notes</h2>
-			<button onClick={() => setShowAll(!showAll)}>
+			<button onClick={() => setShowAll(!showAll)} className="mb-2">
 				show {showAll ? 'important' : 'all'}
 			</button>
+
 			<Table striped>
-
-
-
 				<tbody>
 
 					{notes.map(note =>

@@ -5,54 +5,54 @@ const useResource = (token) => {
 	const baseUrl = '/api/notes'
 	const [resources, setResources] = useState([])
 
-	const getAll = () => {
-		axios.get(baseUrl) // Use the token in the request header
-			.then((response) => {
-				setResources(response.data)
+	const getAll = async () => {
+		try {
+			const response = await axios.get(baseUrl)
+			setResources(response.data)
+		} catch (error) {
+			console.error('Error fetching resources:', error)
+		}
+	}
+
+	const create = async (newObject) => {
+		try {
+			const response = await axios.post(baseUrl, newObject, {
+				headers: { Authorization: `Bearer ${token}` },
 			})
-			.catch((error) => {
-				console.error('Error fetching resources:', error)
-
-			})
+			setResources([...resources, response.data])
+			return response.data
+		} catch (error) {
+			console.error('Error creating resource:', error)
+			throw error
+		}
 	}
 
-	const create = (newObject) => {
-		return new Promise((resolve, reject) => {
-			axios.post(baseUrl, newObject, { headers: { Authorization: `Bearer ${token}` } })
-				.then((response) => {
-					setResources([...resources, response.data])
-					resolve(response.data)
-				})
-				.catch((error) => {
-					console.error('Error creating resource:', error)
-					reject(error)
-				})
-		})
-	}
-
-	const update = (id, newNote) => {
-		return new Promise((resolve, reject) => {
-			axios.put(baseUrl + `/${id}`, newNote)
-				.then((response) => {
-					if (response === null) {
-						setResources(resources.filter((n) => n.id !== id))
-					} else {
-						setResources(resources.map((note) => (note.id !== id ? note : response.data)))
-					}
-					resolve(response.data)
-				})
-				.catch((error) => {
-					setResources(resources.filter((n) => n.id !== id))
-					reject(error)
-				})
-		})
-	}
-	const deleteNote = (id) => {
+	const deleteNote = async (id) => {
+		const config = { headers: { Authorization: `Bearer ${token}` } }
 		setResources(resources.filter((n) => n.id !== id))
-		return axios.delete(`${baseUrl}/${id}`)
+		await axios.delete(`${baseUrl}/${id}`, config)
+	}
+
+
+
+
+	const update = async (id, newNote) => {
+		try {
+			const response = await axios.put(`${baseUrl}/${id}`, newNote)
+			if (!response.data) {
+				setResources(resources.filter((n) => n.id !== id))
+			} else {
+				setResources(resources.map((note) => (note.id !== id ? note : response.data)))
+			}
+			return response.data
+		} catch (error) {
+			setResources(resources.filter((n) => n.id !== id))
+			throw error
+		}
 	}
 
 	return [resources, { getAll, create, update, deleteNote }]
 }
-
 export default useResource
+
+

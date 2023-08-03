@@ -31,7 +31,6 @@ const App = () => {
     padding: 5
   }
 
-  console.log(resourceActions)
   useEffect(() => {
     resourceActions.getAll()
   }, [])
@@ -55,87 +54,88 @@ const App = () => {
   }, [])
 
   const noteFormRef = useRef()
-
-  const addNote = (noteObject) => {
-    noteFormRef.current.toggleVisibility()
-    console.log(resourceActions.create)
-    resourceActions
-      .create(noteObject)
-      .then((returnedNote) => {
-        console.log(returnedNote)
-        setNotification(`Added ${returnedNote.content}`)
-        setTimeout(() => {
-          setNotification(null)
-        }, 5000)
-      })
-      .catch((error) => {
-        console.log(error.response.data.error)
-
-        setErrorMessage(`${error.response.data.error}`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-        if (error.response.data.error === 'token expired') {
-          setUser(null)
-          window.localStorage.removeItem('loggedBlogappUser')
-        }
-      })
-  }
+  const navigate = useNavigate()
 
 
-  const toggleImportanceOf = (id) => {
-    const note = notes.find((n) => n.id === id)
-    const changedNote = { ...note, important: !note.important }
-
-    resourceActions
-      .update(id, changedNote)
-      .then((returnedNote) => {
-        if (returnedNote === null) {
-          setErrorMessage(
-            `Note '${note.content}' was already removed from server`
-          )
-          setTimeout(() => {
-            setErrorMessage(null)
-          }, 5000)
-
-        }
-      })
-      .catch((error) => {
-        setErrorMessage(`${error.response.data.error}`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-
-      })
-  }
-  const deleteNote = (id) => {
-    const note = notes.find((n) => n.id === id)
-    if (!note) {
-      setErrorMessage(`Note '${note.content}' was already removed from server`)
+  const addNote = async (noteObject) => {
+    try {
+      noteFormRef.current.toggleVisibility()
+      const returnedNote = await resourceActions.create(noteObject)
+      console.log(returnedNote)
+      await resourceActions.getAll()
+      setNotification(`Added ${returnedNote.content}`)
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000)
+    }
+    catch (error) {
+      console.log(error.response.data.error)
+      setErrorMessage(`${error.response.data.error}`)
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
-      return
+      if (error.response.data.error === 'token expired') {
+        setUser(null)
+        window.localStorage.removeItem('loggedBlogappUser')
+      }
     }
-    resourceActions
-      .deleteNote(id)
-      .then(() => {
-        setNotification(`Deleted ${note.content} note`)
-        setTimeout(() => {
-          setNotification(null)
-        }, 5000)
+  }
 
-      })
-      .catch((error) => {
-        setErrorMessage(`Error deleting the note: ${error.message}`)
+
+  const toggleImportanceOf = async (id) => {
+    const note = notes.find((n) => n.id === id)
+    const changedNote = { ...note, important: !note.important }
+    try {
+      const returnedNote = await resourceActions.update(id, changedNote)
+
+      if (returnedNote === null) {
+        setErrorMessage(
+          `Note '${note.content}' was already removed from server`
+        )
         setTimeout(() => {
           setErrorMessage(null)
         }, 5000)
-      })
-    navigate('/notes')
+
+      }
+    } catch (error) {
+      setErrorMessage(`${error.response.data.error}`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+
+    }
   }
 
-  const navigate = useNavigate()
+  const deleteNote = async (id) => {
+    try {
+      console.log(id)
+      const note = notes.find((n) => n.id === id)
+      if (!note) {
+        setErrorMessage(`Note '${note.content}' was already removed from server`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+        return
+      }
+
+      await resourceActions.deleteNote(id)
+      await resourceActions.getAll()
+      console.log(notes)
+      navigate('/notes')
+      setNotification(`Deleted ${note.content} note`)
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000)
+    }
+    catch (error) {
+      setErrorMessage(`Error deleting the note: ${error.message}`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+
+  }
+
 
   const handleLogin = async (username, password) => {
     try {
@@ -203,6 +203,7 @@ const App = () => {
       </div>
 
       <Routes>
+
         <Route path="/notes/:id" element={<Note
           note={note}
           toggleImportance={() => toggleImportanceOf(note.id)}
@@ -215,7 +216,6 @@ const App = () => {
         <Route path="/" element={<Home showAll={showAll} />} />
         <Route path="/login" element={
           <LoginForm handleLogin={handleLogin} />
-
         } />
 
       </Routes>

@@ -4,10 +4,11 @@ import React, { useState } from 'react'
 
 const Note = ({ note, toggleImportance, deleteNote }) => {
   const [showModal, setShowModal] = useState(false)
-  console.log(note)
-  const label = note.important ? 'make not important' : 'make important'
+  //console.log(note)
+  //const label = note.important ? 'make not important' : 'make important'
 
   const handleDeletion = () => {
+    console.log('hey')
     setShowModal(true)
   }
   const cancelDeletion = () => {
@@ -16,7 +17,7 @@ const Note = ({ note, toggleImportance, deleteNote }) => {
   return (
     <li className="note">
       {note.content}
-      <button onClick={toggleImportance}>{label}</button>
+      {<button onClick={toggleImportance}>re</button>}
       <button
         type="button"
         onClick={() => handleDeletion()}
@@ -26,8 +27,8 @@ const Note = ({ note, toggleImportance, deleteNote }) => {
       </button>
 
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className="confirm-overlay">
+          <div className="confirm">
             <h2>Confirm Deletion</h2>
             <p>Are you sure you want to delete this note?</p>
             <div className="button-container">
