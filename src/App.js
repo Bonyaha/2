@@ -106,7 +106,7 @@ const App = () => {
     }
   }
 
-  const deleteNote = async (id) => {
+  const deleteNote = (id) => {
     try {
       console.log(id)
       const note = notes.find((n) => n.id === id)
@@ -118,9 +118,8 @@ const App = () => {
         return
       }
 
-      await resourceActions.deleteNote(id)
-      await resourceActions.getAll()
-      console.log(notes)
+      resourceActions.deleteNote(id)
+
       navigate('/notes')
       setNotification(`Deleted ${note.content} note`)
       setTimeout(() => {
@@ -135,6 +134,33 @@ const App = () => {
     }
 
   }
+
+  /* const deleteNote = (id) => {
+    const note = notes.find((n) => n.id === id)
+    if (!note) {
+      setErrorMessage(`Note '${note.content}' was already removed from server`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+      return
+    }
+    resourceActions
+      .deleteNote(id)
+      .then(() => {
+        setNotification(`Deleted ${note.content} note`)
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000)
+
+      })
+      .catch((error) => {
+        setErrorMessage(`Error deleting the note: ${error.message}`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
+    navigate('/notes')
+  } */
 
 
   const handleLogin = async (username, password) => {

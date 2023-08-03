@@ -4,8 +4,8 @@ import React, { useState } from 'react'
 
 const Note = ({ note, toggleImportance, deleteNote }) => {
   const [showModal, setShowModal] = useState(false)
-  //console.log(note)
-  //const label = note.important ? 'make not important' : 'make important'
+  console.log(note)
+  const label = note.important ? 'make not important' : 'make important'
 
   const handleDeletion = () => {
     console.log('hey')
@@ -17,7 +17,7 @@ const Note = ({ note, toggleImportance, deleteNote }) => {
   return (
     <li className="note">
       {note.content}
-      {<button onClick={toggleImportance}>re</button>}
+      {<button onClick={toggleImportance}>{label}</button>}
       <button
         type="button"
         onClick={() => handleDeletion()}
@@ -47,3 +47,6 @@ const Note = ({ note, toggleImportance, deleteNote }) => {
 }
 
 export default Note
+
+
+

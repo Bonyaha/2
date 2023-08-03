@@ -27,10 +27,11 @@ const useResource = (token) => {
 		}
 	}
 
-	const deleteNote = async (id) => {
+	const deleteNote = (id) => {
 		const config = { headers: { Authorization: `Bearer ${token}` } }
+
+		axios.delete(`${baseUrl}/${id}`, config)
 		setResources(resources.filter((n) => n.id !== id))
-		await axios.delete(`${baseUrl}/${id}`, config)
 	}
 
 
